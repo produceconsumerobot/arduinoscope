@@ -17,6 +17,16 @@
   Public License along with this library; if not, write to the
   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
   Boston, MA  02111-1307  USA
+  
+ ****** Modified by Sean Montgomery (www.ProduceConsumeRobot.com) 2013/04 *******
+ * https://github.com/produceconsumerobot/
+ * 
+ * - Bug fix: Changed line drawing from line(x, y1, x, y2) to line(x1, y1, x2, y2) to
+ *		avoid problem in Processing 2.0b8 that draws nothing if calling line(x, y, x, y)
+ *
+ * - New Feature: Added public void setPointsPerWindow(int nPoints) so that the amount
+ * 		(time window) of data displayed on the screen can be easily changed.
+ * 
  */
 
 package arduinoscope;
@@ -37,7 +47,7 @@ import processing.core.PConstants;
 public class Oscilloscope implements PConstants {
 
 	PApplet myParent;
-	public final String VERSION = "0.1.0";
+	public final String VERSION = "0.1.1";
 	
 	private int[] pos = new int[2]; // x, y start position
 	private int[] dim = new int[2]; // w, h dimensions
@@ -48,6 +58,7 @@ public class Oscilloscope implements PConstants {
 	private int[] values; // all values in the graph
 	private float resolution; // max number that be displayed
 	private float multiplier; // the voltage multiplier
+	private int pointsPerWindow; // number of data points in a window
 	  
 	private int minval;
 	private int maxval;
@@ -150,7 +161,11 @@ public class Oscilloscope implements PConstants {
 	public void setPause(boolean pause) {
 		this.pause = pause;
 	}
-
+	
+	public void setPointsPerWindow(int nPoints) {
+		this.pointsPerWindow = nPoints;
+		values = new int[pointsPerWindow];
+	}
 
 	
 	
@@ -173,6 +188,8 @@ public class Oscilloscope implements PConstants {
 
 		pos = posv;
 	    dim = dimv;
+	    pointsPerWindow = dim[0];
+	    
 		line_color = myParent.color(255,255,255);
 		
 		logic_colors[0] = myParent.color(255,0,0);
@@ -180,7 +197,7 @@ public class Oscilloscope implements PConstants {
 		
 	    minval = (int)resolution;
 	    
-	    values = new int[dim[0]];	    
+	    values = new int[pointsPerWindow];	    
 	}
 
 	/**
@@ -197,7 +214,7 @@ public class Oscilloscope implements PConstants {
 			myParent.stroke(line_color);
 	    }
 		
-		for (int x=1; x<dim[0]; x++) {
+		for (int x=1; x<pointsPerWindow; x++) {
 			if (logic){
 	    		if (values[x] > (resolution/2)){
 	    			myParent.stroke(logic_colors[1]);
@@ -206,7 +223,7 @@ public class Oscilloscope implements PConstants {
 	    		}
 	    		myParent.line(pos[0] + dim[0]-x-2,   pos[1], pos[0] + dim[0]-x-2, pos[1] + dim[1]);
 	      }else{
-	    	  myParent.line(pos[0] + dim[0]-x, pos[1] + dim[1]-getY(values[x-1])-1, pos[0] + dim[0]-x, pos[1] + dim[1]-getY(values[x])-1);
+	    	  myParent.line(pos[0] + (pointsPerWindow-x)*dim[0]/pointsPerWindow, pos[1] + dim[1]-getY(values[x-1])-1, pos[0] + (pointsPerWindow-x-1)*dim[0]/pointsPerWindow, pos[1] + dim[1]-getY(values[x])-1);
 	      }
 
 	    }
@@ -221,10 +238,10 @@ public class Oscilloscope implements PConstants {
 	// add a single point
 	  public void addData(int val){
 	    if (!pause){
-	      for (int i=0; i<dim[0]-1; i++){
+	      for (int i=0; i<pointsPerWindow-1; i++){
 	        values[i] = values[i+1];
 	      }
-	      values[dim[0]-1] = val;
+	      values[pointsPerWindow-1] = val;
 	      if (val < minval){
 	        minval = val;
 	      }

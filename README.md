@@ -22,6 +22,17 @@ This is a up-to-date port of my original oscilliscope. It is also the current so
 
 If you want to modify the processing front-end, see [instructions](https://github.com/konsumer/arduinoscope/tree/master/processing).
 
+ ****** Modified by Sean Montgomery (www.ProduceConsumeRobot.com) 2013/04 *******
+ * https://github.com/produceconsumerobot/
+ * 
+ * - Bug fix: Changed line drawing from line(x, y1, x, y2) to line(x1, y1, x2, y2) to
+ *		avoid problem in Processing 2.0b8 that draws nothing if calling line(x, y, x, y)
+ *
+ * - New Feature: Added public void setPointsPerWindow(int nPoints) so that the amount
+ * 		(time window) of data displayed on the screen can be easily changed.
+ * 
+ */
+
 
 ## Node
 
